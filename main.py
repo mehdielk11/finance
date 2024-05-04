@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import messagebox, Label, Entry, Button, OptionMenu, StringVar
 from customtkinter import *
 
+MONTHS_IN_YEAR = 12
+DAYS_IN_YEAR = 365
+
 def calculate_present_value(v0_entry, t_entry, n_entry):
     try:
         v0 = float(v0_entry.get())
@@ -173,199 +176,155 @@ def show_annuities_window():
         elif value == "Valeur Actuelle":
             show_valeur_actuelle_window()
 
-def calculate_simple_interest(principal_amount, period_value, period_category):
-    try:
-        principal = float(principal_amount)
-        period_value = float(period_value)
-        
-        # Determine the 'categ' value based on the period category
-        if period_category == "années":
-            categ = 100
-        elif period_category == "mois":
-            categ = 1200
-        elif period_category == "jours":
-            categ = 36000
-        else:
-            messagebox.showerror("Error", "Période invalide.")
-            return
-        
-        # Open the Simple Interest window
-        show_simple_interest_window(principal, period_value, categ)
-    except ValueError:
-        messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
 
-def calculate_simple_interest_value(capital_amount, tax_rate, period_value, categ):
-    try:
-        capital = float(capital_amount)
-        tax = float(tax_rate)
-        
-        # Calculate simple interest based on the provided parameters
-        simple_interest = (capital * tax * period_value) / categ
-        
-        # Display the calculated simple interest value
-        messagebox.showinfo("Intérêt Simple Calculé", f"Intérêt Simple: {simple_interest:.2f}")
-    except ValueError:
-        messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
+def open_interest_window():
+    # Create a new window for interest calculations
+    interest_window = CTkToplevel()
+    interest_window.title("Calcul d'Intérêt")
+    interest_window.grab_set()
+    interest_window.geometry('250x250')
+
+    # Label for period category selection
+    category_label = CTkLabel(interest_window, text="Sélectionnez la période :", font=('Arial', 15))
+    category_label.pack(pady=10)
+
+    # Dropdown menu for selecting period category
+    category_var = StringVar()
+    category_var.set("years")
+    category_combobox = OptionMenu(interest_window, category_var, "years", "months", "days")
+    category_combobox.pack(pady=10)
+
+    # Entry for period value
+    value_label = CTkLabel(interest_window, text="Valeur de la période:", font=('Arial', 15))
+    value_label.pack(pady=10)
+    value_entry = CTkEntry(interest_window)
+    value_entry.pack(pady=5)
+
+    def continue_button_click():
+        period_category = category_var.get()
+        try:
+            period_value = float(value_entry.get())
+
+            if period_category == "years":
+                period_in_years = period_value
+            elif period_category == "months":
+                period_in_years = period_value / MONTHS_IN_YEAR
+            elif period_category == "days":
+                period_in_years = period_value / DAYS_IN_YEAR
+            else:
+                period_in_years = 0
+
+            if period_in_years <= 1:
+                open_simple_interest_window(period_in_years)
+            else:
+                open_compound_interest_window(period_in_years)
+
+        except ValueError:
+            messagebox.showerror("Error", "Veuillez entrer une valeur numérique valide pour la période.")
+
+    # Continue button to proceed based on the selected period
+    continue_button = CTkButton(interest_window, text="Continuer", command=continue_button_click, font=('Arial', 15))
+    continue_button.pack(pady=20)
 
 
-def convert_to_years(period_category, period_value):
-    if period_category == "jours":
-        return period_value / 365  # Assuming 1 year = 365 days
-    elif period_category == "mois":
-        return period_value / 12  # 1 year = 12 months
-    elif period_category == "années":
-        return period_value  # Already in years
-    else:
-        return None
-
-def show_simple_interest_window(principal, period_value, categ):
+def open_simple_interest_window(period_in_years):
+    # Create a new window for simple interest calculation
     simple_interest_window = CTkToplevel()
     simple_interest_window.title("Intérêt Simple")
-    simple_interest_window.geometry("300x250")
     simple_interest_window.grab_set()
-    # Label and Entry for capital amount (C)
-    capital_label = CTkLabel(simple_interest_window, text="Montant du Capital (C) :", font=('Arial', 15))
-    capital_label.pack(pady=10)
-    capital_entry = CTkEntry(simple_interest_window, width=150)
-    capital_entry.pack()
-
-    # Label and Entry for tax rate (t)
-    tax_label = CTkLabel(simple_interest_window, text="Taux d'Intérêt (t) :", font=('Arial', 15))
-    tax_label.pack(pady=10)
-    tax_entry = CTkEntry(simple_interest_window, width=150)
-    tax_entry.pack()
-
-    # Button to calculate simple interest value
-    calculate_button = CTkButton(simple_interest_window, text="Calculer", font=('Arial', 15), 
-                              command=lambda: calculate_simple_interest_value(capital_entry.get(), tax_entry.get(), period_value, categ))
-    calculate_button.pack(pady=20)
+    simple_interest_window.geometry("250x250")
     
-def calculate_and_display_interest(C, t, principal, period_value, categ):
-    try:
-        C = float(C)
-        t = float(t)
-        # Calculate the simple interest
-        interest = calculate_interest(C, t, period_value, categ)
-        
-        # Display the calculated simple interest
-        result_label = CTkLabel(text=f"Intérêt Simple Calculé: {interest:.2f}")
-        result_label.pack(padx=20, pady=20)
-    except ValueError:
-        messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
+    # Function to calculate simple interest
+    def calculate_simple_interest(principal, rate, time):
+        try:
+            principal_value = float(principal.get())
+            rate_value = float(rate.get())  # Convert rate to decimal
 
-def calculate_compound_interest(C, t, n):
-    try:
-        C = float(C)
-        t = float(t)
-        n = float(n)
+            # Calculate the simple interest
+            categ = 100  # Default category for 'years'
+            if period_in_years <= 1:
+                categ = 100
+            elif period_in_years > 1 / MONTHS_IN_YEAR:
+                categ = 1200
+            elif period_in_years > 1 / DAYS_IN_YEAR:
+                categ = 36000
 
-        # Calculate compound interest (i)
-        i = C * (((1 + t) ** n) - 1)
+            # Calculate the simple interest using the provided formula
+            simple_interest = (principal_value * rate_value * period_in_years) / categ
+            messagebox.showinfo("Intérêt Simple Calculé", f"Intérêt Simple: {simple_interest:.2f}")
+        except ValueError:
+            messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
-        # Calculate Valeur Acquise (VA)
-        VA = C * ((1 + t) ** n)
+    # Labels and entries for principal, rate, and time period
+    principal_label = CTkLabel(simple_interest_window, text="Capital :", font=('Arial', 15))
+    principal_label.pack(pady=10)
+    principal_entry = CTkEntry(simple_interest_window)
+    principal_entry.pack(pady=5)
 
-        # Calculate Valeur Actuelle (C)
-        if t != 0:
-            Cv = VA * ((1 + t) ** (-n))
+    rate_label = CTkLabel(simple_interest_window, text="Taux d'Intérêt (%):", font=('Arial', 15))
+    rate_label.pack(pady=10)
+    rate_entry = CTkEntry(simple_interest_window)
+    rate_entry.pack(pady=5)
 
-        return i, VA, Cv
-    except ValueError:
-        messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
+    # Calculate button for simple interest
+    calculate_button = CTkButton(simple_interest_window, text="Calculer Intérêt Simple", font=('Arial', 15),
+                                  command=lambda: calculate_simple_interest(principal_entry, rate_entry, period_in_years))
+    calculate_button.pack(pady=20)
 
-def show_compound_interest_window(principal, period_value):
+
+def open_compound_interest_window(period_in_years):
+    # Create a new window for compound interest calculation
     compound_interest_window = CTkToplevel()
     compound_interest_window.title("Intérêt Composé")
-    compound_interest_window.geometry("350x300")
     compound_interest_window.grab_set()
-    # Labels and Entries for input values
-    C_label = CTkLabel(compound_interest_window, text="Capital Initial (C):", font=('Arial', 15))
-    C_label.pack(pady=10)
-    C_entry = CTkEntry(compound_interest_window, width=150)
-    C_entry.pack()
+    compound_interest_window.geometry("300x350")
 
-    t_label = CTkLabel(compound_interest_window, text="Taux par Période (t):", font=('Arial', 15))
-    t_label.pack(pady=10)
-    t_entry = CTkEntry(compound_interest_window, width=150)
-    t_entry.pack()
+    # Function to calculate compound interest, future value, and present value
+    def calculate_compound_interest(principal, rate, periods):
+        try:
+            principal_value = float(principal.get())
+            rate_value = float(rate.get()) / 100  # Convert rate to decimal
+            periods_value = float(periods.get())
 
-    n_label = CTkLabel(compound_interest_window, text="Nombre de Périodes (n):", font=('Arial', 15))
-    n_label.pack(pady=10)
-    n_entry = CTkEntry(compound_interest_window, width=150)
-    n_entry.pack()
+            # Calculate compound interest
+            compound_interest = principal_value * ((1 + rate_value) ** periods_value - 1)
 
-    # Button to calculate compound interest and display results
-    def calculate_and_display():
-        C = C_entry.get()
-        t = t_entry.get()
-        n = n_entry.get()
+            # Calculate future value (valeur acquise)
+            future_value = principal_value * (1 + rate_value) ** periods_value
 
-        # Calculate compound interest, Valeur Acquise, and Valeur Actuelle
-        result = calculate_compound_interest(C, t, n)
-        if result:
-            i, VA, Cv = result
-            messagebox.showinfo("Résultats : Intérêt Composé", f"Intérêt Composé (i): {i:.2f}\nValeur Acquise (VA): {VA:.2f}\nValeur Actuelle (C): {Cv:.2f}")
+            # Calculate present value (valeur actuelle)
+            present_value = future_value / ((1 + rate_value) ** periods_value)
 
-    calculate_button = CTkButton(compound_interest_window, text="Calculer", font=('Arial', 15), command=calculate_and_display)
-    calculate_button.pack(pady=20)
-    
-    
-def show_interest_window():
-    interest_window = CTkToplevel(window)
-    interest_window.title("Calcul d'Intérêt")
-    interest_window.geometry("300x350")
-    interest_window.grab_set()
-    
-    # Label and Entry for principal amount
-    principal_label = CTkLabel(interest_window, text="Montant Principal :", font=('Arial', 15))
+            messagebox.showinfo("Résultats de l'Intérêt Composé", 
+                                f"Montant d'Escompte: {compound_interest:.2f}\n\n"
+                                f"Valeur Acquise: {future_value:.2f}\n\n"
+                                f"Valeur Actuelle: {present_value:.2f}")
+
+        except ValueError:
+            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
+
+    # Labels and entries for principal, rate, and periods
+    principal_label = CTkLabel(compound_interest_window, text="Capital (C):", font=('Arial', 15))
     principal_label.pack(pady=10)
-    principal_entry = CTkEntry(interest_window, width=150)
-    principal_entry.pack()
+    principal_entry = CTkEntry(compound_interest_window)
+    principal_entry.pack(pady=5)
 
-    # Label and ComboBox for period categories
-    period_label = CTkLabel(interest_window, text="Période :", font=('Arial', 15))
-    period_label.pack(pady=10)
-    
-    period_categories = ["années", "mois", "jours"]
+    rate_label = CTkLabel(compound_interest_window, text="Taux d'Intérêt par Période (%):", font=('Arial', 15))
+    rate_label.pack(pady=10)
+    rate_entry = CTkEntry(compound_interest_window)
+    rate_entry.pack(pady=5)
 
-    # Function to handle combobox selection
-    def handle_combobox_selection(event):
-        period_category = period_combobox.get()
-        print("Selected period category:", period_category)
+    periods_label = CTkLabel(compound_interest_window, text="Nombre de Périodes (n):", font=('Arial', 15))
+    periods_label.pack(pady=10)
+    periods_entry = CTkEntry(compound_interest_window)
+    periods_entry.pack(pady=5)
 
-    period_combobox = CTkComboBox(interest_window, values=period_categories)
-    period_combobox.pack(pady=10)
-    period_combobox.configure(state="readonly")
-    period_combobox.bind("<<ComboboxSelected>>", handle_combobox_selection)
-
-    # Entry for the period value
-    period_value_label = CTkLabel(interest_window, text="Valeur de la période :", font=('Arial', 15))
-    period_value_label.pack(pady=10)
-    period_value_entry = CTkEntry(interest_window, width=150, font=('Arial', 15))
-    period_value_entry.pack()
-
-    # Button to calculate interest
-    def calculate_interest():
-        principal = principal_entry.get()
-        period_value = float(period_value_entry.get())
-        period_category = period_combobox.get()
-        
-        # Convert period value to years
-        period_in_years = convert_to_years(period_category, period_value)
-        
-        if period_in_years is None:
-            CTkMessageBox.showerror("Error", "Période invalide.")
-            return
-        
-        # Determine which interest calculation window to open
-        if period_in_years <= 1:
-            show_simple_interest_window(principal, period_value, 100)  # Using categ = 100 for years
-        else:
-            show_compound_interest_window(principal, period_value)
-
-    calculate_button = CTkButton(interest_window, text="Continuer", font=('Arial', 15), command=calculate_interest)
+    # Calculate button for compound interest
+    calculate_button = CTkButton(compound_interest_window, text="Calculer Intérêt Composé", font=('Arial', 15),
+                                  command=lambda: calculate_compound_interest(principal_entry, rate_entry, periods_entry))
     calculate_button.pack(pady=20)
+
 
 
 
@@ -551,11 +510,11 @@ def show_progressive_annuities_window():
 window = CTk()
 
 window.title("Gestion Financière")
-
 # Create buttons for each operation
-
-interest_button = CTkButton(window, text="Calcul d'Intérêt", command=show_interest_window, width=250, font=("Arial", 15))
-interest_button.pack(pady=10)
+interest_menu = CTkButton(window,text="Calcul d'Intérêts", command=open_interest_window, width=250, font=("Arial", 15))
+interest_menu.pack(pady=10)
+# interest_button = CTkButton(window, text="Calcul d'Intérêt", command=show_interest_window, width=250, font=("Arial", 15))
+# interest_button.pack(pady=10)
 
 discount_button = CTkButton(window, text="Opérations d'Escompte", command=show_discount_window, width=250, font=("Arial", 15))
 discount_button.pack(pady=10)
