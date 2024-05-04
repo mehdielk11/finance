@@ -65,7 +65,6 @@ def calculate_valeur_acquise(t_entry, periods_var, v0_entry, n_entry, custom_per
     except ValueError:
         messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
-
 def show_valeur_acquise_window():
     valeur_acquise_window = CTkToplevel(window)
     valeur_acquise_window.title("Calcul de la Valeur Acquise")
@@ -96,6 +95,7 @@ def show_valeur_acquise_window():
 
     # Create a CTkComboBox for the dropdown
     periods_combobox = CTkComboBox(valeur_acquise_window, values=periods_options, width=150)
+    periods_combobox.configure(state='readonly')
     periods_combobox.pack(pady=10)
 
     # Entry for custom periods per year (hidden by default)
@@ -168,6 +168,7 @@ def show_annuities_window():
     annuity_type = StringVar(annuities_window)
     annuity_type.set("Valeur Acquise")  # Default value
     type_options = OptionMenu(annuities_window, annuity_type, "Valeur Acquise", "Valeur Actuelle", command=lambda value: handle_annuity_type(value))
+    type_options.configure(font=('Arial', 10))
     type_options.pack(pady=10)
 
     def handle_annuity_type(value):
@@ -175,6 +176,7 @@ def show_annuities_window():
             show_valeur_acquise_window()
         elif value == "Valeur Actuelle":
             show_valeur_actuelle_window()
+
 
 
 
@@ -193,6 +195,7 @@ def open_interest_window():
     category_var = StringVar()
     category_var.set("years")
     category_combobox = OptionMenu(interest_window, category_var, "years", "months", "days")
+    category_combobox.configure(font=('Arial', 10))
     category_combobox.pack(pady=10)
 
     # Entry for period value
@@ -227,19 +230,26 @@ def open_interest_window():
     continue_button = CTkButton(interest_window, text="Continuer", command=continue_button_click, font=('Arial', 15))
     continue_button.pack(pady=20)
 
-
 def open_simple_interest_window(period_in_years):
     # Create a new window for simple interest calculation
     simple_interest_window = CTkToplevel()
     simple_interest_window.title("Intérêt Simple")
     simple_interest_window.grab_set()
-    simple_interest_window.geometry("250x250")
+    simple_interest_window.geometry("300x240")
     
+    # Predefined interest rate options
+    predefined_rates = [5, 6, 7, 8, 9]  # Example predefined interest rates in percentage
+
     # Function to calculate simple interest
     def calculate_simple_interest(principal, rate, time):
         try:
             principal_value = float(principal.get())
-            rate_value = float(rate.get())  # Convert rate to decimal
+            
+            # Check if rate is a custom value or predefined
+            if rate_var.get() == 'Custom':
+                rate_value = float(custom_rate_entry.get())  # Custom rate entered by the user
+            else:
+                rate_value = float(rate_var.get())  # Predefined rate selected
 
             # Calculate the simple interest
             categ = 100  # Default category for 'years'
@@ -262,15 +272,45 @@ def open_simple_interest_window(period_in_years):
     principal_entry = CTkEntry(simple_interest_window)
     principal_entry.pack(pady=5)
 
+    # OptionMenu for selecting interest rate
     rate_label = CTkLabel(simple_interest_window, text="Taux d'Intérêt (%):", font=('Arial', 15))
     rate_label.pack(pady=10)
-    rate_entry = CTkEntry(simple_interest_window)
-    rate_entry.pack(pady=5)
+
+    # Define rate selection variable
+    rate_var = StringVar(simple_interest_window)
+    rate_var.set('5')  # Default selection
+
+    rate_option_menu = OptionMenu(simple_interest_window, rate_var, *(['Custom'] + predefined_rates))
+    rate_option_menu.configure(font=('Arial', 10))
+    rate_option_menu.pack(pady=5)
+
+    # Entry field for custom interest rate
+    custom_rate_label = CTkLabel(simple_interest_window, text="Taux d'Intérêt personnalisé (%):", font=('Arial', 15))
+    custom_rate_entry = CTkEntry(simple_interest_window)
+
+    # Function to show/hide custom rate entry based on selection
+    def show_hide_custom_rate_entry(selected_value):
+        if selected_value == 'Custom':
+            custom_rate_label.pack(pady=10)
+            custom_rate_entry.pack(pady=5)
+            simple_interest_window.geometry("300x320")
+        else:
+            custom_rate_label.pack_forget()
+            custom_rate_entry.pack_forget()
+            simple_interest_window.geometry("300x240")
+
+    # Update custom rate entry visibility when the OptionMenu selection changes
+    rate_var.trace('w', lambda *args: show_hide_custom_rate_entry(rate_var.get()))
 
     # Calculate button for simple interest
     calculate_button = CTkButton(simple_interest_window, text="Calculer Intérêt Simple", font=('Arial', 15),
-                                  command=lambda: calculate_simple_interest(principal_entry, rate_entry, period_in_years))
-    calculate_button.pack(pady=20)
+                                  command=lambda: calculate_simple_interest(principal_entry, rate_var, period_in_years))
+    
+    # Pack the button to always appear at the bottom
+    calculate_button.pack(side='bottom', pady=20)
+
+    # Initially hide the custom rate entry
+    show_hide_custom_rate_entry(rate_var.get())
 
 
 def open_compound_interest_window(period_in_years):
@@ -278,7 +318,10 @@ def open_compound_interest_window(period_in_years):
     compound_interest_window = CTkToplevel()
     compound_interest_window.title("Intérêt Composé")
     compound_interest_window.grab_set()
-    compound_interest_window.geometry("300x350")
+    compound_interest_window.geometry("300x320")
+
+    # Predefined interest rates
+    predefined_rates = [1, 2.5, 5, 10, "Custom"]
 
     # Function to calculate compound interest, future value, and present value
     def calculate_compound_interest(principal, rate, periods):
@@ -310,21 +353,47 @@ def open_compound_interest_window(period_in_years):
     principal_entry = CTkEntry(compound_interest_window)
     principal_entry.pack(pady=5)
 
-    rate_label = CTkLabel(compound_interest_window, text="Taux d'Intérêt par Période (%):", font=('Arial', 15))
-    rate_label.pack(pady=10)
-    rate_entry = CTkEntry(compound_interest_window)
-    rate_entry.pack(pady=5)
-
     periods_label = CTkLabel(compound_interest_window, text="Nombre de Périodes (n):", font=('Arial', 15))
     periods_label.pack(pady=10)
     periods_entry = CTkEntry(compound_interest_window)
     periods_entry.pack(pady=5)
+    
+    # OptionMenu for interest rate selection
+    rate_label = CTkLabel(compound_interest_window, text="Taux d'Intérêt par Période (%):", font=('Arial', 15))
+    rate_label.pack(pady=10)
+
+    # Variable to store the selected rate
+    selected_rate = tk.StringVar(compound_interest_window)
+    selected_rate.set(predefined_rates[0])  # Set initial value
+
+    # Function to handle rate selection
+    def handle_rate_selection(value):
+        if value == "Custom":
+            # Show custom rate entry
+            rate_entry.pack(pady=5)
+            compound_interest_window.geometry("300x360")
+        else:
+            # Hide custom rate entry
+            rate_entry.pack_forget()
+            compound_interest_window.geometry("300x320")
+
+    # OptionMenu for rate selection
+    rate_option_menu = tk.OptionMenu(compound_interest_window, selected_rate, *predefined_rates, command=handle_rate_selection)
+    rate_option_menu.configure(font=('Arial', 10))
+    rate_option_menu.pack(pady=5)
+
+    # Entry field for custom rate
+    rate_entry = CTkEntry(compound_interest_window)
+
+    # periods_label = CTkLabel(compound_interest_window, text="Nombre de Périodes (n):", font=('Arial', 15))
+    # periods_label.pack(pady=10)
+    # periods_entry = CTkEntry(compound_interest_window)
+    # periods_entry.pack(pady=5)
 
     # Calculate button for compound interest
     calculate_button = CTkButton(compound_interest_window, text="Calculer Intérêt Composé", font=('Arial', 15),
-                                  command=lambda: calculate_compound_interest(principal_entry, rate_entry, periods_entry))
-    calculate_button.pack(pady=20)
-
+                                  command=lambda: calculate_compound_interest(principal_entry, rate_entry if selected_rate.get() == "Custom" else selected_rate, periods_entry))
+    calculate_button.pack(side='bottom', pady=20)
 
 
 
@@ -495,6 +564,7 @@ def show_progressive_annuities_window():
         progressive_annuities_window, annuity_type, "Valeur Actuelle", "Valeur Acquise",
         command=lambda value: handle_progressive_annuity_type(value)
     )
+    type_options.configure(font=('Arial', 10))
     type_options.pack(pady=10)
 
     # Function to handle the selected annuity type
