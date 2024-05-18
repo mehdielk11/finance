@@ -1,9 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox, Label, Entry, Button, OptionMenu, StringVar
 from customtkinter import *
+from CTkMessagebox import CTkMessagebox
 
 MONTHS_IN_YEAR = 12
-DAYS_IN_YEAR = 360 # note 360
+DAYS_IN_YEAR = 360 
+
+# constant annuities section
 
 def calculate_present_value(v0_entry, t_entry, n_entry):
     try:
@@ -20,20 +23,11 @@ def calculate_present_value(v0_entry, t_entry, n_entry):
         
         vad = v0 * (1+t) * ((1 - (1 + t)**(-n)) / t)
         # Display the calculated present value in a message box
-        messagebox.showinfo("Calcul de la Valeur Actuelle", f"Valeur Actuelle en Fin de Période : {vaf:.2f}\n\nValeur Actuelle en Début de Période: {vad:.2f}")
+        CTkMessagebox(title="Calcul de la Valeur Actuelle" ,message= f"Valeur Actuelle en Fin de Période : {vaf:.2f}\n\nValeur Actuelle en Début de Période: {vad:.2f}")
 
 
     except ValueError:
         messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
-
-def perform_discount(principal_entry, discount_rate_entry):
-    principal = float(principal_entry.get())
-    discount_rate = float(discount_rate_entry.get())
-
-    # Example calculation (replace with your discount logic)
-    discounted_amount = principal * (1 - (discount_rate / 100))
-
-    messagebox.showinfo("Calcul de l'Escompte", f"Montant Escompté: {discounted_amount:.2f}")
       
 def calculate_valeur_acquise(t_entry, periods_var, v0_entry, n_entry, custom_period_entry):
     try:
@@ -61,7 +55,7 @@ def calculate_valeur_acquise(t_entry, periods_var, v0_entry, n_entry, custom_per
         vad = v0 * (1 + tp) * (((1 + tp) ** n ) - 1) / tp
         
         # Display the calculated Acquired Value in a message box
-        messagebox.showinfo("Calcul de la Valeur Acquise", f"Valeur Acquise en Fin de Période : {vaf:.2f}\n\nValeur Acquise en Début de Période : {vad:.2f}")
+        CTkMessagebox(title="Calcul de la Valeur Acquise", message= f"Valeur Acquise en Fin de Période : {vaf:.2f}\n\nValeur Acquise en Début de Période : {vad:.2f}")
     except ValueError:
         messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
@@ -178,7 +172,7 @@ def show_annuities_window():
             show_valeur_actuelle_window()
 
 
-
+# interest section
 
 def open_interest_window():
     # Create a new window for interest calculations
@@ -235,7 +229,7 @@ def open_simple_interest_window(period_in_years):
     simple_interest_window = CTkToplevel()
     simple_interest_window.title("Intérêt Simple")
     simple_interest_window.grab_set()
-    simple_interest_window.geometry("300x240")
+    simple_interest_window.geometry("300x200")
     
     # Predefined interest rate options
     predefined_rates = [5, 6, 7, 8, 9]  # Example predefined interest rates in percentage
@@ -267,19 +261,19 @@ def open_simple_interest_window(period_in_years):
             # print(f'value : {principal_value:.2f}\n')
             simple_interest = (principal_value * rate_value * period_in_years) / categ
             valeur_actuelle = principal_value - simple_interest
-            messagebox.showinfo("Intérêt Simple Calculé", f"Intérêt Simple: {simple_interest:.2f}\nValeur Actuelle: {valeur_actuelle:.2f}")
+            CTkMessagebox(title="Intérêt Simple Calculé", message= f"Intérêt Simple: {simple_interest:.2f}\nValeur Actuelle: {valeur_actuelle:.2f}").geometry("300x200")
         except ValueError:
             messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
     # Labels and entries for principal, rate, and time period
     principal_label = CTkLabel(simple_interest_window, text="Capital :", font=('Arial', 15))
-    principal_label.pack(pady=10)
+    principal_label.pack(pady=5)
     principal_entry = CTkEntry(simple_interest_window)
     principal_entry.pack(pady=5)
 
     # OptionMenu for selecting interest rate
     rate_label = CTkLabel(simple_interest_window, text="Taux d'Intérêt (%):", font=('Arial', 15))
-    rate_label.pack(pady=10)
+    rate_label.pack(pady=5)
 
     # Define rate selection variable
     rate_var = StringVar(simple_interest_window)
@@ -296,13 +290,13 @@ def open_simple_interest_window(period_in_years):
     # Function to show/hide custom rate entry based on selection
     def show_hide_custom_rate_entry(selected_value):
         if selected_value == 'Custom':
-            custom_rate_label.pack(pady=10)
+            custom_rate_label.pack(pady=5)
             custom_rate_entry.pack(pady=5)
-            simple_interest_window.geometry("300x320")
+            simple_interest_window.geometry("300x270")
         else:
             custom_rate_label.pack_forget()
             custom_rate_entry.pack_forget()
-            simple_interest_window.geometry("300x240")
+            simple_interest_window.geometry("300x200")
 
     # Update custom rate entry visibility when the OptionMenu selection changes
     rate_var.trace('w', lambda *args: show_hide_custom_rate_entry(rate_var.get()))
@@ -312,7 +306,7 @@ def open_simple_interest_window(period_in_years):
                                   command=lambda: calculate_simple_interest(principal_entry, rate_var, period_in_years))
     
     # Pack the button to always appear at the bottom
-    calculate_button.pack(side='bottom', pady=20)
+    calculate_button.pack(side='bottom', pady=10)
 
     # Initially hide the custom rate entry
     show_hide_custom_rate_entry(rate_var.get())
@@ -322,7 +316,7 @@ def open_compound_interest_window(period_in_years):
     compound_interest_window = CTkToplevel()
     compound_interest_window.title("Intérêt Composé")
     compound_interest_window.grab_set()
-    compound_interest_window.geometry("300x320")
+    compound_interest_window.geometry("300x330")
 
     # Predefined interest rates
     predefined_rates = [1, 2.5, 5, 10, "Custom"]
@@ -343,10 +337,10 @@ def open_compound_interest_window(period_in_years):
             # Calculate present value (valeur actuelle)
             present_value = future_value / ((1 + rate_value) ** periods_value)
 
-            messagebox.showinfo("Résultats de l'Intérêt Composé", 
+            CTkMessagebox(title="Résultats de l'Intérêt Composé", message=
                                 f"Montant d'Escompte: {compound_interest:.2f}\n\n"
                                 f"Valeur Acquise: {future_value:.2f}\n\n"
-                                f"Valeur Actuelle: {present_value:.2f}")
+                                f"Valeur Actuelle: {present_value:.2f}").geometry("350x250")
 
         except ValueError:
             messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
@@ -379,7 +373,7 @@ def open_compound_interest_window(period_in_years):
         else:
             # Hide custom rate entry
             rate_entry.pack_forget()
-            compound_interest_window.geometry("300x320")
+            compound_interest_window.geometry("300x330")
 
     # OptionMenu for rate selection
     rate_option_menu = tk.OptionMenu(compound_interest_window, selected_rate, *predefined_rates, command=handle_rate_selection)
@@ -400,29 +394,109 @@ def open_compound_interest_window(period_in_years):
     calculate_button.pack(side='bottom', pady=20)
 
 
+# escompte section
 
 def show_discount_window():
     discount_window = CTkToplevel(window)
     discount_window.title("Opérations d'Escompte")
-    discount_window.geometry("300x200")
+    discount_window.geometry("300x350")
     discount_window.grab_set()
     # Label and Entry for principal amount
-    principal_label = CTkLabel(discount_window, text="Montant Principal :")
+    principal_label = CTkLabel(discount_window, text="Montant Principal :", font=('Arial', 15))
     principal_label.pack(pady=10)
     principal_entry = CTkEntry(discount_window, width=150)
     principal_entry.pack()
 
     # Label and Entry for discount rate
-    discount_rate_label = CTkLabel(discount_window, text="Taux d'Escompte (%):")
+    discount_rate_label = CTkLabel(discount_window, text="Taux d'Escompte (%):", font=('Arial', 15))
     discount_rate_label.pack(pady=10)
     discount_rate_entry = CTkEntry(discount_window, width=150)
     discount_rate_entry.pack()
 
+    period_label = CTkLabel(discount_window, text="Nombre de jours :", font=('Arial', 15))
+    period_label.pack(pady=10)
+    period_entry = CTkEntry(discount_window, width=150)
+    period_entry.pack(pady=5)
+    
     # Button to calculate discounted amount
-    calculate_discount_button = CTkButton(discount_window, text="Calculer l'Escompte", command=lambda: perform_discount(principal_entry, discount_rate_entry))
-    calculate_discount_button.pack(pady=20)
+    calculate_discount_button = CTkButton(discount_window, text="Calculer l'Escompte", command=lambda: perform_discount(principal_entry, discount_rate_entry, period_entry), font=('Arial', 15))
+    calculate_discount_button.pack(pady=10)
+    
+    # calculate taux réel ( agios tva )
+    calculate_real_rate = CTkButton(discount_window, text="Calculer le Taux Réel", command=lambda: show_real_rate_window(), font=('Arial', 15))
+    calculate_real_rate.pack(pady=5)
+ 
+def show_real_rate_window():
+    real_rate_window = CTkToplevel(window)
+    real_rate_window.title("Taux Réel d'Escompte")
+    real_rate_window.geometry("300x400")
+    real_rate_window.grab_set()
+    # Label and Entry for principal amount
+    principal_label = CTkLabel(real_rate_window, text="Montant Principal :", font=('Arial', 15))
+    principal_label.pack(pady=5)
+    principal_entry = CTkEntry(real_rate_window, width=150)
+    principal_entry.pack()
+
+    # Label and Entry for discount rate
+    discount_rate_label = CTkLabel(real_rate_window, text="Taux d'Escompte (%) :", font=('Arial', 15))
+    discount_rate_label.pack(pady=5)
+    discount_rate_entry = CTkEntry(real_rate_window, width=150)
+    discount_rate_entry.pack()
+
+    period_label = CTkLabel(real_rate_window, text="Nombre de jours :", font=('Arial', 15))
+    period_label.pack(pady=5)
+    period_entry = CTkEntry(real_rate_window, width=150)
+    period_entry.pack()
+    
+    tva_rate_label = CTkLabel(real_rate_window, text="Taux de TVA (%) :", font=('Arial', 15))
+    tva_rate_label.pack(pady=5)
+    tva_rate_entry = CTkEntry(real_rate_window, width=150)
+    tva_rate_entry.pack()
+    
+    commissions_label = CTkLabel(real_rate_window, text="Total de commissions:", font=('Arial', 15))
+    commissions_label.pack(pady=5)
+    commissions_entry = CTkEntry(real_rate_window, width=150)
+    commissions_entry.pack()
+    
+    
+    # calculate taux réel ( agios tva )
+    calculate_real_rate = CTkButton(real_rate_window, text="Calculer le Taux Réel", command=lambda: perform_real_rate(principal_entry, discount_rate_entry, period_entry, tva_rate_entry, commissions_entry), font=('Arial', 15))
+    calculate_real_rate.pack(pady=20)
+    
+def perform_discount(principal_entry, discount_rate_entry, period_entry):
+    principal = float(principal_entry.get())
+    discount_rate = float(discount_rate_entry.get())
+    period = int(period_entry.get())
+    
+    # Example calculation (replace with your discount logic)
+    discounted_amount = (principal * discount_rate * period) / 36000
+
+    # messagebox.showinfo("Calcul de l'Escompte", f"Montant Escompté: {discounted_amount:.2f}\n Valeur Actuelle: {principal - discounted_amount}")
+    CTkMessagebox(title="Calcul de l'Escompte", message= f"Montant Escompté: {discounted_amount:.2f}\n Valeur Actuelle: {principal - discounted_amount}", font=('Arial', 13)).geometry("300x200")
+
+def perform_real_rate(principal_entry, discount_rate_entry, period_entry, tva_rate_entry, commissions_entry):
+    principal = float(principal_entry.get())
+    discount_rate = float(discount_rate_entry.get())
+    period = int(period_entry.get())
+    tva_rate = float(tva_rate_entry.get())
+    commissions = float(commissions_entry.get())
+    
+    # escompte
+    discounted_amount = (principal * discount_rate * period) / 36000
+
+    # calculate TVA
+    TVA = (discounted_amount + commissions) * (tva_rate / 100)
+    
+    # calculate AGIOS
+    AGIOS = discounted_amount + commissions + TVA
+    
+    # calculate real rate
+    real_rate = (36000 * AGIOS) / (principal * period)
+
+    CTkMessagebox(title="Taux Réel d'escompte", message= f"TVA : {TVA:.2f}\nAGIOS: {AGIOS:.2f}\nTaux Réel : {real_rate:.2f}%", font=('Arial', 13)).geometry("300x200")
 
 
+# progressive annuities section
 
 def calculate_valeur_actuelle_progressive(V0, q, n, t):
     try:
@@ -441,8 +515,6 @@ def calculate_valeur_actuelle_progressive(V0, q, n, t):
     except ValueError:
         messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
-
-# Function to handle 'Valeur Actuelle' selection for progressive annuities
 def show_valeur_actuelle_progressive_window():
     valeur_actuelle_window = CTkToplevel(window)
     valeur_actuelle_window.title("Valeur Actuelle en Annuités Progressives")
@@ -478,7 +550,7 @@ def perform_valeur_actuelle_calculation(V0, q, n, t):
     if Vaf is not None and Vad is not None:
         result_window = CTkToplevel(window)
         result_window.title("Résultats : Valeur Actuelle en Annuités Progressives")
-        result_window.geometry("400x150")
+        result_window.geometry("350x150")
         result_window.grab_set()
         vaf_label = CTkLabel(result_window, text=f"Valeur Actuelle en Fin de Périodes : {Vaf:.2f}")
         vaf_label.pack(pady=10)
@@ -539,8 +611,9 @@ def perform_valeur_acquise_calculation(V0, q, n, t):
     Vaf, Vad = calculate_valeur_acquise_progressive(V0, q, n, t)
     if Vaf is not None and Vad is not None:
         result_window = CTkToplevel(window)
+        result_window.grab_set()
         result_window.title("Résultats : Valeur Aquise en Annuités Progressives")
-        result_window.geometry("400x200")
+        result_window.geometry("350x150")
 
         vaf_label = CTkLabel(result_window, text=f"Valeur Aquise en Fin de Périodes : {Vaf:.2f}")
         vaf_label.pack(pady=10)
@@ -550,7 +623,6 @@ def perform_valeur_acquise_calculation(V0, q, n, t):
     else:
         messagebox.showerror("Error", "Une erreur s'est produite lors du calcul.")
 
-# Function to show options for progressive annuities
 def show_progressive_annuities_window():
     progressive_annuities_window = CTkToplevel(window)
     progressive_annuities_window.title("Annuités en Progression")
