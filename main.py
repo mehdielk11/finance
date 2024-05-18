@@ -3,7 +3,7 @@ from tkinter import messagebox, Label, Entry, Button, OptionMenu, StringVar
 from customtkinter import *
 
 MONTHS_IN_YEAR = 12
-DAYS_IN_YEAR = 365
+DAYS_IN_YEAR = 360 # note 360
 
 def calculate_present_value(v0_entry, t_entry, n_entry):
     try:
@@ -261,8 +261,13 @@ def open_simple_interest_window(period_in_years):
                 categ = 36000
 
             # Calculate the simple interest using the provided formula
+            # print(f'categ : {categ:.2f}\n')
+            # print(f'rate : {rate_value:.2f}\n')
+            # print(f'period : {period_in_years:.2f}\n')
+            # print(f'value : {principal_value:.2f}\n')
             simple_interest = (principal_value * rate_value * period_in_years) / categ
-            messagebox.showinfo("Intérêt Simple Calculé", f"Intérêt Simple: {simple_interest:.2f}")
+            valeur_actuelle = principal_value - simple_interest
+            messagebox.showinfo("Intérêt Simple Calculé", f"Intérêt Simple: {simple_interest:.2f}\nValeur Actuelle: {valeur_actuelle:.2f}")
         except ValueError:
             messagebox.showerror("Error", "Veuillez entrer des valeurs numériques valides.")
 
@@ -311,7 +316,6 @@ def open_simple_interest_window(period_in_years):
 
     # Initially hide the custom rate entry
     show_hide_custom_rate_entry(rate_var.get())
-
 
 def open_compound_interest_window(period_in_years):
     # Create a new window for compound interest calculation
@@ -417,8 +421,6 @@ def show_discount_window():
     # Button to calculate discounted amount
     calculate_discount_button = CTkButton(discount_window, text="Calculer l'Escompte", command=lambda: perform_discount(principal_entry, discount_rate_entry))
     calculate_discount_button.pack(pady=20)
-
-
 
 
 
