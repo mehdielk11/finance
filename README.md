@@ -6,10 +6,10 @@
 pip install tkinter
 ```
 
-** Customtkinter **
+**Customtkinter**
 ```
 pip install customtkinter
 ```
-## ** AUTHORS :** ##
+## **AUTHORS :** ##
 [Mehdi ELKHEMLICHI](https://github.com/mehdielk11)
 Hajar ELMANGOUD
