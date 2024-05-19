@@ -1,5 +1,5 @@
 # Projet Mathématiques Finanacières #
-### Dependencies :###
+### Dependencies : ###
 
 **Tkinter**
 ```
