@@ -31,7 +31,7 @@ def calculate_present_value(v0_entry, t_entry, n_entry):
       
 def calculate_valeur_acquise(t_entry, periods_var, v0_entry, n_entry, custom_period_entry):
     try:
-        t = float(t_entry.get())  # Annual tax rate
+        t = float(t_entry.get()) / 100 # Annual tax rate
         v0 = float(v0_entry.get())  # Initial value
         n = float(n_entry.get())  # Number of periods
 
@@ -62,15 +62,28 @@ def calculate_valeur_acquise(t_entry, periods_var, v0_entry, n_entry, custom_per
 def show_valeur_acquise_window():
     valeur_acquise_window = CTkToplevel(window)
     valeur_acquise_window.title("Calcul de la Valeur Acquise")
-    valeur_acquise_window.geometry("350x430")
+    valeur_acquise_window.geometry("350x400")
     valeur_acquise_window.grab_set()
 
+    # Label and Entry for v0 (Initial Value)
+    v0_label = CTkLabel(valeur_acquise_window, text="Valeur initiale (v0):", font=('Arial', 15))
+    v0_label.pack(pady=10)
+    v0_entry = CTkEntry(valeur_acquise_window, width=200)
+    v0_entry.pack()
+    
     # Label and Entry for t (Annual Tax Rate)
-    t_label = CTkLabel(valeur_acquise_window, text="Taux Annuel (t):", font=('Arial', 15))
+    t_label = CTkLabel(valeur_acquise_window, text="Taux Annuel (t%):", font=('Arial', 15))
     t_label.pack(pady=10)
-    t_entry = CTkEntry(valeur_acquise_window, width=150)
+    t_entry = CTkEntry(valeur_acquise_window, width=200)
     t_entry.pack()
 
+        # Label and Entry for n (Number of Periods)
+    n_label = CTkLabel(valeur_acquise_window, text="Nombre de périodes (n):", font=('Arial', 15))
+    n_label.pack(pady=10)
+    n_entry = CTkEntry(valeur_acquise_window, width=200)
+    n_entry.pack()
+    
+    
     # Label and ComboBox for p (Periods per Year)
     p_label = CTkLabel(valeur_acquise_window, text="Périodes par an (p):", font=('Arial', 15))
     p_label.pack(pady=10)
@@ -87,42 +100,37 @@ def show_valeur_acquise_window():
     periods_var = StringVar(valeur_acquise_window)
     periods_var.set(periods_options[0])  # Default value
 
-    # Create a CTkComboBox for the dropdown
-    periods_combobox = CTkComboBox(valeur_acquise_window, values=periods_options, width=150)
-    periods_combobox.configure(state='readonly')
-    periods_combobox.pack(pady=10)
-
-    # Entry for custom periods per year (hidden by default)
-    custom_period_entry = CTkEntry(valeur_acquise_window, width=150, placeholder_text='valeur personnalisée')
-    custom_period_entry.pack(pady=5)
-    custom_period_entry.configure(state="normal")  # Initially disabled
-
     # Function to enable/disable custom period entry based on selection
     def toggle_custom_period_entry(selected_option):
         if selected_option == "valeur personnalisée":
             custom_period_entry.configure(state="normal")
+            custom_period_entry.pack(pady=5)
+            valeur_acquise_window.geometry("350x425")
         else:
             custom_period_entry.configure(state="disabled")
+            custom_period_entry.pack_forget()
+            valeur_acquise_window.geometry("350x390")
 
-    # Bind the toggle function to the combobox
-    periods_combobox.bind("<<ComboboxSelected>>", lambda event: toggle_custom_period_entry(periods_combobox.get()))
+    # Create a CTkComboBox for the dropdown
+    periods_combobox = CTkComboBox(master=valeur_acquise_window, 
+                                   values=periods_options, 
+                                   width=200, 
+                                   variable=periods_var, 
+                                   justify='center',
+                                   font=("Halvetica", 14),
+                                   dropdown_font=("Halvetica", 14),
+                                   command=lambda value: toggle_custom_period_entry(value))
+    periods_combobox.configure(state='readonly')
+    periods_combobox.pack(pady=5)
 
-    # Label and Entry for v0 (Initial Value)
-    v0_label = CTkLabel(valeur_acquise_window, text="Valeur initiale (v0):")
-    v0_label.pack(pady=10)
-    v0_entry = CTkEntry(valeur_acquise_window, width=150)
-    v0_entry.pack()
-
-    # Label and Entry for n (Number of Periods)
-    n_label = CTkLabel(valeur_acquise_window, text="Nombre de périodes (n):")
-    n_label.pack(pady=10)
-    n_entry = CTkEntry(valeur_acquise_window, width=150)
-    n_entry.pack()
+    # Entry for custom periods per year (hidden by default)
+    custom_period_entry = CTkEntry(valeur_acquise_window, width=200, placeholder_text='valeur personnalisée')
+    custom_period_entry.configure(state="disabled")
 
     # Button to calculate
-    calculate_button = CTkButton(valeur_acquise_window, text="Calculer", command=lambda: calculate_valeur_acquise(t_entry, periods_combobox, v0_entry, n_entry, custom_period_entry))
-    calculate_button.pack(pady=20)
-
+    calculate_button = CTkButton(valeur_acquise_window, text="Calculer", font=('Arial', 15), width=200, command=lambda: calculate_valeur_acquise(t_entry, periods_combobox, v0_entry, n_entry, custom_period_entry))
+    calculate_button.pack(side='bottom',pady=20)
+    
 def show_valeur_actuelle_window():
     form_window = CTkToplevel(window)
     form_window.title("Calcul de la Valeur Actuelle")
@@ -131,23 +139,23 @@ def show_valeur_actuelle_window():
     # Label and Entry for V0 (Valeur initiale)
     v0_label = CTkLabel(form_window, text="V0 (Valeur initiale):", font=('Arial', 15))
     v0_label.pack(pady=10)
-    v0_entry = CTkEntry(form_window, width=150)
+    v0_entry = CTkEntry(form_window, width=200)
     v0_entry.pack()
 
     # Label and Entry for t (Taux)
     t_label = CTkLabel(form_window, text="t (Taux par Période):", font=('Arial', 15))
     t_label.pack(pady=10)
-    t_entry = CTkEntry(form_window, width=150)
+    t_entry = CTkEntry(form_window, width=200)
     t_entry.pack()
 
     # Label and Entry for n (Nombre de périodes)
     n_label = CTkLabel(form_window, text="n (Nombre de périodes):", font=('Arial', 15))
     n_label.pack(pady=10)
-    n_entry = CTkEntry(form_window, width=150)
+    n_entry = CTkEntry(form_window, width=200)
     n_entry.pack()
 
     # Button to calculate present value
-    calculate_button = CTkButton(form_window, text="Calculer", command=lambda: calculate_present_value(v0_entry, t_entry, n_entry))
+    calculate_button = CTkButton(form_window, text="Calculer", font=("Arial", 15), width=200, command=lambda: calculate_present_value(v0_entry, t_entry, n_entry))
     calculate_button.pack(pady=20)
 
 def show_annuities_window():
@@ -159,10 +167,12 @@ def show_annuities_window():
     annuity_type_label = CTkLabel(annuities_window, text="Sélectionnez le type d'annuité:", font=('Arial', 15))
     annuity_type_label.pack(pady=10)
 
+    category = ["Valeur Acquise","Valeur Actuelle"]
     annuity_type = StringVar(annuities_window)
     annuity_type.set("Valeur Acquise")  # Default value
-    type_options = OptionMenu(annuities_window, annuity_type, "Valeur Acquise", "Valeur Actuelle", command=lambda value: handle_annuity_type(value))
-    type_options.configure(font=('Arial', 10))
+    type_options = CTkComboBox(master=annuities_window, values=category, variable=annuity_type, command=lambda value: handle_annuity_type(value))
+    type_options.configure(state='readonly')
+    type_options.configure(font=('Arial', 14))
     type_options.pack(pady=10)
 
     def handle_annuity_type(value):
@@ -193,7 +203,8 @@ def open_interest_window():
     ]
     category_var = StringVar(interest_window)
     category_var.set(category_options[0])
-    category_combobox = CTkComboBox(master=interest_window, values=category_options, width=150, variable=category_var, font=('Arial', 14))
+    category_combobox = CTkComboBox(master=interest_window, values=category_options, width=100, variable=category_var, font=('Helvetica', 16), 
+                                    dropdown_font=('Helvetica', 14), justify='center')
     category_combobox.configure(state='readonly')
     category_combobox.pack(pady=5)
 
@@ -524,32 +535,32 @@ def calculate_valeur_actuelle_progressive(V0, q, n, t):
 
 def show_valeur_actuelle_progressive_window():
     valeur_actuelle_window = CTkToplevel(window)
-    valeur_actuelle_window.title("Valeur Actuelle en Annuités Progressives")
-    valeur_actuelle_window.geometry("300x400")
+    valeur_actuelle_window.title("Valeur Actuelle")
+    valeur_actuelle_window.geometry("320x380")
     valeur_actuelle_window.grab_set()
     # Labels and Entries for input values
     v0_label = CTkLabel(valeur_actuelle_window, text="V0 (Versement):", font=('Arial', 15))
     v0_label.pack(pady=10)
-    v0_entry = CTkEntry(valeur_actuelle_window, width=150)
+    v0_entry = CTkEntry(valeur_actuelle_window, width=200)
     v0_entry.pack()
 
     q_label = CTkLabel(valeur_actuelle_window, text="q (Progression Géométrique):", font=('Arial', 15))
     q_label.pack(pady=10)
-    q_entry = CTkEntry(valeur_actuelle_window, width=150)
+    q_entry = CTkEntry(valeur_actuelle_window, width=200)
     q_entry.pack()
 
     n_label = CTkLabel(valeur_actuelle_window, text="n (Nombre de périodes):", font=('Arial', 15))
     n_label.pack(pady=10)
-    n_entry = CTkEntry(valeur_actuelle_window, width=150)
+    n_entry = CTkEntry(valeur_actuelle_window, width=200)
     n_entry.pack()
 
     t_label = CTkLabel(valeur_actuelle_window, text="t (Taux par Période):", font=('Arial', 15))
     t_label.pack(pady=10)
-    t_entry = CTkEntry(valeur_actuelle_window, width=150)
+    t_entry = CTkEntry(valeur_actuelle_window, width=200)
     t_entry.pack()
 
     # Button to calculate and display results
-    calculate_button = CTkButton(valeur_actuelle_window, text="Calculer", command=lambda: perform_valeur_actuelle_calculation(v0_entry.get(), q_entry.get(), n_entry.get(), t_entry.get()))
+    calculate_button = CTkButton(valeur_actuelle_window, text="Calculer", font=('Arial', 15), width=200, command=lambda: perform_valeur_actuelle_calculation(v0_entry.get(), q_entry.get(), n_entry.get(), t_entry.get()))
     calculate_button.pack(pady=20)
 
 def perform_valeur_actuelle_calculation(V0, q, n, t):
@@ -586,32 +597,32 @@ def calculate_valeur_acquise_progressive(V0, q, n, t):
 
 def show_valeur_acquise_progressive_window():
     valeur_acquise_window = CTkToplevel(window)
-    valeur_acquise_window.title("Calcul : Valeur Aquise en Annuités Progressives")
-    valeur_acquise_window.geometry("350x400")
+    valeur_acquise_window.title("Valeur Aquise")
+    valeur_acquise_window.geometry("340x340")
     valeur_acquise_window.grab_set()
-    # Labels and Entries for input values
+    
     v0_label = CTkLabel(valeur_acquise_window, text="V0 (Versement):", font=('Arial', 15))
-    v0_label.pack(pady=10)
-    v0_entry = CTkEntry(valeur_acquise_window, width=150)
+    v0_label.pack(pady=5)
+    v0_entry = CTkEntry(valeur_acquise_window, width=200)
     v0_entry.pack()
 
     q_label = CTkLabel(valeur_acquise_window, text="q (Progression Géométrique):", font=('Arial', 15))
-    q_label.pack(pady=10)
-    q_entry = CTkEntry(valeur_acquise_window, width=150)
+    q_label.pack(pady=5)
+    q_entry = CTkEntry(valeur_acquise_window, width=200)
     q_entry.pack()
 
     n_label = CTkLabel(valeur_acquise_window, text="n (Nombre de Périodes):", font=('Arial', 15))
-    n_label.pack(pady=10)
-    n_entry = CTkEntry(valeur_acquise_window, width=150)
+    n_label.pack(pady=5)
+    n_entry = CTkEntry(valeur_acquise_window, width=200)
     n_entry.pack()
 
-    t_label = CTkLabel(valeur_acquise_window, text="t (Tax par Période):", font=('Arial', 15))
-    t_label.pack(pady=10)
-    t_entry = CTkEntry(valeur_acquise_window, width=150)
+    t_label = CTkLabel(valeur_acquise_window, text="t (Taux par Période):", font=('Arial', 15))
+    t_label.pack(pady=5)
+    t_entry = CTkEntry(valeur_acquise_window, width=200)
     t_entry.pack()
 
     # Button to calculate and display results
-    calculate_button = CTkButton(valeur_acquise_window, text="Calculer", command=lambda: perform_valeur_acquise_calculation(v0_entry.get(), q_entry.get(), n_entry.get(), t_entry.get()))
+    calculate_button = CTkButton(valeur_acquise_window, text="Calculer", font=('Arial', 15), width=200, command=lambda: perform_valeur_acquise_calculation(v0_entry.get(), q_entry.get(), n_entry.get(), t_entry.get()))
     calculate_button.pack(pady=20)
 
 def perform_valeur_acquise_calculation(V0, q, n, t):
@@ -639,13 +650,12 @@ def show_progressive_annuities_window():
     annuity_type_label = CTkLabel(progressive_annuities_window, text="Sélectionnez le type d'annuité:", font=('Arial', 15))
     annuity_type_label.pack(pady=10)
 
+    category = ["Valeur Actuelle", "Valeur Acquise"]
     annuity_type = StringVar(progressive_annuities_window)
     annuity_type.set("Valeur Actuelle")  # Default value
-    type_options = OptionMenu(
-        progressive_annuities_window, annuity_type, "Valeur Actuelle", "Valeur Acquise",
-        command=lambda value: handle_progressive_annuity_type(value)
-    )
-    type_options.configure(font=('Arial', 10))
+    type_options = CTkComboBox(master=progressive_annuities_window, variable=annuity_type, values=category, command=lambda value: handle_progressive_annuity_type(value))
+    type_options.configure(state='readonly')
+    type_options.configure(font=('Arial', 14))
     type_options.pack(pady=10)
 
     # Function to handle the selected annuity type
@@ -662,24 +672,22 @@ window = CTk()
 
 window.title("Gestion Financière")
 # Create buttons for each operation
-interest_menu = CTkButton(window,text="Calcul d'Intérêts", command=open_interest_window, width=250, font=("Arial", 15))
+interest_menu = CTkButton(window,text="Calcul d'Intérêts", command=open_interest_window, width=270, font=("Arial", 18), border_spacing=6)
 interest_menu.pack(pady=10)
-# interest_button = CTkButton(window, text="Calcul d'Intérêt", command=show_interest_window, width=250, font=("Arial", 15))
-# interest_button.pack(pady=10)
 
-discount_button = CTkButton(window, text="Opérations d'Escompte", command=show_discount_window, width=250, font=("Arial", 15))
+discount_button = CTkButton(window, text="Opérations d'Escompte", command=show_discount_window, width=270, font=("Arial", 18), border_spacing=6)
 discount_button.pack(pady=10)
 
-annuities_button = CTkButton(window, text="Annuités Constantes", command=show_annuities_window, width=250, font=("Arial", 15))
+annuities_button = CTkButton(window, text="Annuités Constantes", command=show_annuities_window, width=270, font=("Arial", 18), border_spacing=6)
 annuities_button.pack(pady=10)
 
-progressive_annuities_button = CTkButton(window, text="Annuités en Progression", command=show_progressive_annuities_window, width=250, font=("Arial", 15))
+progressive_annuities_button = CTkButton(window, text="Annuités en Progression", command=show_progressive_annuities_window, width=270, font=("Arial", 18), border_spacing=6)
 progressive_annuities_button.pack(pady=10)
 
 # combobox = CTkComboBox(master=window, values= ["années", "mois", "jours"] )
 # combobox.pack(side="bottom")
 # Set window size and position
-window.geometry("300x200")
+window.geometry("320x230")
 set_appearance_mode("dark")
 window.resizable(True, True) 
 # Start the main event loop
