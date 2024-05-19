@@ -1,3 +1,15 @@
 # Projet Mathématiques Finanacières #
-dependencies : 
-python, tkinter, customtkinter 
+### Dependencies :###
+
+**Tkinter**
+```
+pip install tkinter
+```
+
+** Customtkinter **
+```
+pip install customtkinter
+```
+## ** AUTHORS :** ##
+[Mehdi ELKHEMLICHI](https://github.com/mehdielk11)
+Hajar ELMANGOUD
