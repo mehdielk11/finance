@@ -179,23 +179,28 @@ def open_interest_window():
     interest_window = CTkToplevel()
     interest_window.title("Calcul d'Intérêt")
     interest_window.grab_set()
-    interest_window.geometry('250x250')
+    interest_window.geometry('250x220')
 
     # Label for period category selection
     category_label = CTkLabel(interest_window, text="Sélectionnez la période :", font=('Arial', 15))
-    category_label.pack(pady=10)
+    category_label.pack(pady=5)
 
-    # Dropdown menu for selecting period category
-    category_var = StringVar()
-    category_var.set("years")
-    category_combobox = OptionMenu(interest_window, category_var, "years", "months", "days")
-    category_combobox.configure(font=('Arial', 10))
-    category_combobox.pack(pady=10)
+    
+    category_options = [
+        "years",
+        "months",
+        "days",
+    ]
+    category_var = StringVar(interest_window)
+    category_var.set(category_options[0])
+    category_combobox = CTkComboBox(master=interest_window, values=category_options, width=150, variable=category_var, font=('Arial', 14))
+    category_combobox.configure(state='readonly')
+    category_combobox.pack(pady=5)
 
     # Entry for period value
     value_label = CTkLabel(interest_window, text="Valeur de la période:", font=('Arial', 15))
-    value_label.pack(pady=10)
-    value_entry = CTkEntry(interest_window)
+    value_label.pack(pady=5)
+    value_entry = CTkEntry(interest_window, width=150)
     value_entry.pack(pady=5)
 
     def continue_button_click():
@@ -221,7 +226,7 @@ def open_interest_window():
             messagebox.showerror("Error", "Veuillez entrer une valeur numérique valide pour la période.")
 
     # Continue button to proceed based on the selected period
-    continue_button = CTkButton(interest_window, text="Continuer", command=continue_button_click, font=('Arial', 15))
+    continue_button = CTkButton(interest_window, text="Continuer", command=continue_button_click, font=('Arial', 15), width=150)
     continue_button.pack(pady=20)
 
 def open_simple_interest_window(period_in_years):
@@ -232,7 +237,7 @@ def open_simple_interest_window(period_in_years):
     simple_interest_window.geometry("300x200")
     
     # Predefined interest rate options
-    predefined_rates = [5, 6, 7, 8, 9]  # Example predefined interest rates in percentage
+    # predefined_rates = [5, 6, 7, 8, 9]  # Example predefined interest rates in percentage
 
     # Function to calculate simple interest
     def calculate_simple_interest(principal, rate, time):
@@ -255,10 +260,7 @@ def open_simple_interest_window(period_in_years):
                 categ = 36000
 
             # Calculate the simple interest using the provided formula
-            # print(f'categ : {categ:.2f}\n')
-            # print(f'rate : {rate_value:.2f}\n')
-            # print(f'period : {period_in_years:.2f}\n')
-            # print(f'value : {principal_value:.2f}\n')
+
             simple_interest = (principal_value * rate_value * period_in_years) / categ
             valeur_actuelle = principal_value - simple_interest
             CTkMessagebox(title="Intérêt Simple Calculé", message= f"Intérêt Simple: {simple_interest:.2f}\nValeur Actuelle: {valeur_actuelle:.2f}").geometry("300x200")
@@ -276,11 +278,13 @@ def open_simple_interest_window(period_in_years):
     rate_label.pack(pady=5)
 
     # Define rate selection variable
+    predefined_rates = ['Custom', '5', '6', '7', '8', '9']
+    # Define rate selection variable
     rate_var = StringVar(simple_interest_window)
     rate_var.set('5')  # Default selection
-
-    rate_option_menu = OptionMenu(simple_interest_window, rate_var, *(['Custom'] + predefined_rates))
-    rate_option_menu.configure(font=('Arial', 10))
+    rate_option_menu = CTkComboBox(master=simple_interest_window, values=predefined_rates, width=150, variable=rate_var)
+    rate_option_menu.configure(state='readonly')
+    # rate_option_menu.configure(font=('Arial', 10))
     rate_option_menu.pack(pady=5)
 
     # Entry field for custom interest rate
@@ -292,7 +296,7 @@ def open_simple_interest_window(period_in_years):
         if selected_value == 'Custom':
             custom_rate_label.pack(pady=5)
             custom_rate_entry.pack(pady=5)
-            simple_interest_window.geometry("300x270")
+            simple_interest_window.geometry("300x280")
         else:
             custom_rate_label.pack_forget()
             custom_rate_entry.pack_forget()
@@ -360,15 +364,17 @@ def open_compound_interest_window(period_in_years):
     rate_label = CTkLabel(compound_interest_window, text="Taux d'Intérêt par Période (%):", font=('Arial', 15))
     rate_label.pack(pady=10)
 
+    predefined_rates = ['1', '2.5', '5', '10', "Custom"] # DROPDOWN MENU OPTIONS
+    
     # Variable to store the selected rate
-    selected_rate = tk.StringVar(compound_interest_window)
+    selected_rate = StringVar(compound_interest_window)
     selected_rate.set(predefined_rates[0])  # Set initial value
 
     # Function to handle rate selection
     def handle_rate_selection(value):
         if value == "Custom":
             # Show custom rate entry
-            rate_entry.pack(pady=5)
+            rate_entry.pack(pady=0)
             compound_interest_window.geometry("300x360")
         else:
             # Hide custom rate entry
@@ -376,12 +382,13 @@ def open_compound_interest_window(period_in_years):
             compound_interest_window.geometry("300x330")
 
     # OptionMenu for rate selection
-    rate_option_menu = tk.OptionMenu(compound_interest_window, selected_rate, *predefined_rates, command=handle_rate_selection)
-    rate_option_menu.configure(font=('Arial', 10))
+    rate_option_menu = CTkComboBox(master=compound_interest_window, variable=selected_rate, values=predefined_rates, command=handle_rate_selection)
+    rate_option_menu.configure(font=('Arial', 13))
+    rate_option_menu.configure(state='readonly')
     rate_option_menu.pack(pady=5)
 
     # Entry field for custom rate
-    rate_entry = CTkEntry(compound_interest_window)
+    rate_entry = CTkEntry(compound_interest_window, placeholder_text='valeur personnalisée')
 
     # periods_label = CTkLabel(compound_interest_window, text="Nombre de Périodes (n):", font=('Arial', 15))
     # periods_label.pack(pady=10)
@@ -670,7 +677,7 @@ progressive_annuities_button = CTkButton(window, text="Annuités en Progression"
 progressive_annuities_button.pack(pady=10)
 
 # combobox = CTkComboBox(master=window, values= ["années", "mois", "jours"] )
-# combobox.place(relx=0.5, rely=0.5, anchor='center')
+# combobox.pack(side="bottom")
 # Set window size and position
 window.geometry("300x200")
 set_appearance_mode("dark")
